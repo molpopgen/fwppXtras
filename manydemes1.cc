@@ -76,8 +76,8 @@ int main( int argc, char ** argv )
   const double mu_neutral = theta/(4.*500.);
   //no selection
   std::vector<std::function<double (glist::const_iterator,
-				    glist::const_iterator)> > vbf({std::bind(KTfwd::no_selection(),std::placeholders::_1,std::placeholders::_2),
-					  std::bind(KTfwd::no_selection(),std::placeholders::_1,std::placeholders::_2) });
+				    glist::const_iterator)> > vbf(500,
+								  std::bind(KTfwd::no_selection(),std::placeholders::_1,std::placeholders::_2));
 
 
   //recombination map is uniform[0,1)
