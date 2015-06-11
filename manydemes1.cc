@@ -8,6 +8,15 @@
 #include <fwdpp/diploid.hh>
 
 #include <Sequence/SimData.hpp>
+/*
+  Benchmarks on my laptop with -O3:
+  Format: params, time (minutes' seconds"), RAM based on watching top.
+  migrate 0, seed = 1, 3'53", ~30Mb RAM
+  migrate 0.01, seed = 1, 2'21", ~143Mb RAM.  That RAM use is curious???
+  migrate 0.05, seed = 1, 5'13", 150-200 Mb RAM (I got distracted b/c this is getting boring...)
+  migrate 0.1, seed = 1, 14'47", 190Mb RAM.
+*/
+
 #include <Sequence/SimDataIO.hpp> //for writing & reading SimData objects in binary format
 #include <Sequence/FST.hpp>
 #include <numeric>
@@ -40,10 +49,10 @@ size_t migpop(const size_t & source_pop, gsl_rng * r, const double & mig_prob)
   if( gsl_rng_uniform(r) <= mig_prob )
     {
       //get a new parental population
-      unsigned ppop = gsl_rng_uniform_int(r,10);
+      unsigned ppop = gsl_rng_uniform_int(r,500);
       while(ppop==source_pop)
 	{
-	  ppop = gsl_rng_uniform_int(r,10);
+	  ppop = gsl_rng_uniform_int(r,500);
 	}
       return ppop;
     }
@@ -73,7 +82,7 @@ int main( int argc, char ** argv )
   const double littler = 0.;
 
   //mut. rate per gamete
-  const double mu_neutral = theta/(4.*500.);
+  const double mu_neutral = theta/(4.*10*500.);
   //no selection
   std::vector<std::function<double (glist::const_iterator,
 				    glist::const_iterator)> > vbf(500,
@@ -86,6 +95,7 @@ int main( int argc, char ** argv )
   //Let's evolve it for 10*sum(Ns) generations.
   for( unsigned generation = 0 ; generation < 50000 ; ++generation )
     {
+      if(generation%500==0.)std::cerr<<generation<<'\n';
       std::vector<double> wbars = sample_diploid(r,
 						 &pop.gametes,
 						 &pop.diploids,
@@ -106,7 +116,7 @@ int main( int argc, char ** argv )
 						 std::bind(migpop,std::placeholders::_1,r,migrate),
 						 &fs[0]);
       //4*N b/c it needs to be fixed in the metapopulation
-      remove_fixed_lost(&pop.mutations,&pop.fixations,&pop.fixation_times,&pop.mut_lookup,generation,10*2*500);
+      remove_lost(&pop.mutations);
     }
 }
 
