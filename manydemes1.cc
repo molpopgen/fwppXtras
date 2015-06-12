@@ -5,6 +5,7 @@
 
   Writes the metapop + an "ms"-type sample in binary format to an output file.
  */
+#include <iostream>
 #include <fwdpp/diploid.hh>
 
 #include <Sequence/SimData.hpp>
@@ -95,7 +96,7 @@ int main( int argc, char ** argv )
   //Let's evolve it for 10*sum(Ns) generations.
   for( unsigned generation = 0 ; generation < 50000 ; ++generation )
     {
-      if(generation%500==0.)std::cerr<<generation<<'\n';
+      //if(generation%500==0.)std::cerr<<generation<<'\n';
       std::vector<double> wbars = sample_diploid(r,
 						 &pop.gametes,
 						 &pop.diploids,
@@ -117,6 +118,11 @@ int main( int argc, char ** argv )
 						 &fs[0]);
       //4*N b/c it needs to be fixed in the metapopulation
       remove_lost(&pop.mutations);
+    }
+  auto x = KTfwd::ms_sample(r,&pop.diploids[0],10,true);
+  for( const auto & __x : x )
+    {
+      std::cout << __x.first << ' ' << __x.second << '\n';
     }
 }
 
